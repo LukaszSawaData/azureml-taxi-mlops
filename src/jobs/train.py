@@ -7,7 +7,7 @@ import mlflow
 import pandas as pd
 from mlflow.models import infer_signature
 
-from taxi_aml.model import FEATURES, build_model, evaluate, holdout_split
+from taxi_aml.model import FEATURES, SKOPS_TRUSTED_TYPES, build_model, evaluate, holdout_split
 
 
 def main() -> None:
@@ -32,6 +32,7 @@ def main() -> None:
         signature=infer_signature(sample, model.predict(sample)),
         input_example=sample,
         pip_requirements=["mlflow==3.15.0", "scikit-learn==1.9.1", "pandas==2.3.3"],
+        skops_trusted_types=SKOPS_TRUSTED_TYPES,
     )
 
 

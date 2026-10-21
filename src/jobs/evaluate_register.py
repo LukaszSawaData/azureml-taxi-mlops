@@ -12,7 +12,13 @@ import pandas as pd
 from mlflow import MlflowClient
 from mlflow.exceptions import MlflowException
 
-from taxi_aml.model import CHAMPION_TAG, TARGET, evaluate, promotion_decision
+from taxi_aml.model import (
+    CHAMPION_TAG,
+    SKOPS_TRUSTED_TYPES,
+    TARGET,
+    evaluate,
+    promotion_decision,
+)
 
 
 def find_champion(client: MlflowClient, name: str):
@@ -61,6 +67,7 @@ def main() -> None:
         mlflow.sklearn.load_model(args.model_input),
         name="model",
         registered_model_name=args.model_name,
+        skops_trusted_types=SKOPS_TRUSTED_TYPES,
     )
     version = str(info.registered_model_version)
     for key, value in {

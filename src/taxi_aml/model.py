@@ -18,6 +18,9 @@ RAW_COLUMNS = {
 FEATURES = ["trip_distance", "pickup_hour", "pickup_dow", "passenger_count"]
 TARGET = "fare_amount"
 CHAMPION_TAG = "champion"
+# MLflow 3 saves sklearn models with skops, which rejects types it doesn't know. We train the
+# model ourselves, so we trust exactly the one internal type HistGradientBoosting needs.
+SKOPS_TRUSTED_TYPES = ["sklearn.ensemble._hist_gradient_boosting.predictor.TreePredictor"]
 
 # Data tests: a row must pass all of these to be used.
 RULES = {
