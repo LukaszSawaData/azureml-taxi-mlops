@@ -1,0 +1,21 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+name: taxi_evaluate_register
+display_name: "3. Evaluate vs champion + register"
+inputs:
+  model_input: { type: mlflow_model }
+  scoring_data: { type: uri_folder }
+  model_name: { type: string, default: taxi-fare-model }
+  max_rmse: { type: number, default: 6.0 }
+  build_id: { type: string, default: local }
+code: ../../src
+environment:
+  image: mcr.microsoft.com/azureml/openmpi5.0-ubuntu24.04:20261018.v1
+  conda_file: ../environment/conda.yaml
+command: >-
+  python -m jobs.evaluate_register
+  --model_input ${{inputs.model_input}}
+  --scoring_data ${{inputs.scoring_data}}
+  --model_name ${{inputs.model_name}}
+  --max_rmse ${{inputs.max_rmse}}
+  --build_id ${{inputs.build_id}}

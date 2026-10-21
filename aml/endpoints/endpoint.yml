@@ -1,0 +1,3 @@
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineEndpoint.schema.json
+# name is passed by the deploy script: taxi-fare-dev-<suffix> / taxi-fare-prod-<suffix>
+auth_mode: key

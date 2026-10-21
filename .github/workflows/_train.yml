@@ -1,0 +1,35 @@
+# Reusable: run the training pipeline in one Azure ML workspace.
+name: train (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      environment: { type: string, required: true }
+    outputs:
+      model_version:
+        description: New model version, empty if it was not better than the champion
+        value: ${{ jobs.train.outputs.model_version }}
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    # Student quota: 6 vCPU per region -> never two trainings/deployments at once.
+    concurrency: { group: azureml-quota, cancel-in-progress: false }
+    outputs:
+      model_version: ${{ steps.train.outputs.model_version }}
+    env:
+      AML_WORKSPACE: ${{ vars.AML_WORKSPACE }}
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Azure login (OIDC, no secrets)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - run: az extension add -n ml -y
+      - name: Train pipeline (prep + data tests -> train -> evaluate + register)
+        id: train
+        run: scripts/train.sh "${{ vars.MAX_ROWS }}" "${GITHUB_SHA::7}-${{ github.run_id }}"

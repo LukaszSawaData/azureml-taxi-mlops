@@ -1,0 +1,3 @@
+# Files Azure ML must NOT upload with the code (Azure ML reads this file from the code folder src/).
+__pycache__/
+*.pyc

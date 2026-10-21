@@ -1,0 +1,39 @@
+# Training pipeline: prep (data tests) -> train -> evaluate vs champion + register.
+# Same file for dev and prod; GitHub passes max_rows and build_id per environment.
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+display_name: taxi-train
+experiment_name: taxi-fare
+settings:
+  default_compute: azureml:cpu-cluster
+inputs:
+  raw_data:
+    type: uri_file
+    path: azureml:nyc-taxi-green-2016-01:1
+  max_rows: 3000
+  split_date: "2016-01-25"
+  model_name: taxi-fare-model
+  max_rmse: 6.0
+  build_id: local
+jobs:
+  prep:
+    type: command
+    component: ../components/prep.yml
+    inputs:
+      raw_data: ${{parent.inputs.raw_data}}
+      max_rows: ${{parent.inputs.max_rows}}
+      split_date: ${{parent.inputs.split_date}}
+  train:
+    type: command
+    component: ../components/train.yml
+    inputs:
+      train_data: ${{parent.jobs.prep.outputs.train_data}}
+  evaluate_register:
+    type: command
+    component: ../components/evaluate_register.yml
+    inputs:
+      model_input: ${{parent.jobs.train.outputs.model_output}}
+      scoring_data: ${{parent.jobs.prep.outputs.scoring_data}}
+      model_name: ${{parent.inputs.model_name}}
+      max_rmse: ${{parent.inputs.max_rmse}}
+      build_id: ${{parent.inputs.build_id}}

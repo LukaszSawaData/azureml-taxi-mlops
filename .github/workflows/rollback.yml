@@ -1,0 +1,24 @@
+# Manual: serve an older model version again (no retraining).
+name: rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        options: [dev, prod]
+        required: true
+      version:
+        description: Existing model version to serve again
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  rollback:
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      environment: ${{ inputs.target == 'prod' && 'prod-model' || 'dev' }}
+      model_version: ${{ inputs.version }}

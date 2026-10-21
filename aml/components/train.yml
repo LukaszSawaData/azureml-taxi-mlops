@@ -1,0 +1,16 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+name: taxi_train
+display_name: "2. Train"
+inputs:
+  train_data: { type: uri_folder }
+outputs:
+  model_output: { type: mlflow_model }
+code: ../../src
+environment:
+  image: mcr.microsoft.com/azureml/openmpi5.0-ubuntu24.04:20261018.v1
+  conda_file: ../environment/conda.yaml
+command: >-
+  python -m jobs.train
+  --train_data ${{inputs.train_data}}
+  --model_output ${{outputs.model_output}}

@@ -1,0 +1,14 @@
+# Training environment (built once by Azure ML, then cached by content hash).
+# azureml-mlflow supports MLflow up to 3.15.0 -> pinned.
+name: taxi-train
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - mlflow==3.15.0
+      - azureml-mlflow==1.62.0.post6
+      - scikit-learn==1.9.1
+      - pandas==3.0.6
+      - pyarrow==25.0.1

@@ -1,0 +1,20 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+name: taxi_monitor
+display_name: "Monitor champion (quality + drift)"
+inputs:
+  train_data: { type: uri_folder }
+  scoring_data: { type: uri_folder }
+  model_name: { type: string, default: taxi-fare-model }
+outputs:
+  report: { type: uri_folder }
+code: ../../src
+environment:
+  image: mcr.microsoft.com/azureml/openmpi5.0-ubuntu24.04:20261018.v1
+  conda_file: ../environment/conda.yaml
+command: >-
+  python -m jobs.monitor
+  --train_data ${{inputs.train_data}}
+  --scoring_data ${{inputs.scoring_data}}
+  --model_name ${{inputs.model_name}}
+  --report ${{outputs.report}}

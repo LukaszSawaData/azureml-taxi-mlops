@@ -1,0 +1,41 @@
+# main: DEV again -> [approve code] PROD trains on prod data -> [approve model] PROD endpoint.
+name: cd
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**", "**.md"]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  dev-train:
+    uses: ./.github/workflows/_train.yml
+    with: { environment: dev }
+
+  dev-deploy:
+    needs: dev-train
+    if: needs.dev-train.outputs.model_version != ''
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      environment: dev
+      model_version: ${{ needs.dev-train.outputs.model_version }}
+
+  # Gate 1 (code): GitHub environment "prod" needs your approval.
+  prod-train:
+    needs: dev-deploy
+    if: always() && needs.dev-train.result == 'success' && needs.dev-deploy.result != 'failure'
+    uses: ./.github/workflows/_train.yml
+    with: { environment: prod }
+
+  # Gate 2 (model): GitHub environment "prod-model" needs your approval.
+  prod-deploy:
+    needs: prod-train
+    if: needs.prod-train.outputs.model_version != ''
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      environment: prod-model
+      model_version: ${{ needs.prod-train.outputs.model_version }}

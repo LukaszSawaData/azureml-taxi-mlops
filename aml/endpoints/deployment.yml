@@ -1,0 +1,8 @@
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
+# One deployment called "champion", updated in place with each new model version.
+# MLflow model -> "no-code" deployment: Azure ML builds the scoring server itself.
+name: champion
+# model and endpoint_name are set by scripts/deploy_endpoint.sh
+instance_type: Standard_DS1_v2 # 1 vCPU: two endpoints fit the student quota (4 per family, +20% reserve)
+instance_count: 1
+app_insights_enabled: true # request logs + latency in Application Insights

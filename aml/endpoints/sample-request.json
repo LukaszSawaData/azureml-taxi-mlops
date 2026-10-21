@@ -1,0 +1,11 @@
+{
+  "input_data": {
+    "columns": ["trip_distance", "pickup_hour", "pickup_dow", "passenger_count"],
+    "index": [0, 1, 2],
+    "data": [
+      [1.2, 8.0, 1.0, 1.0],
+      [8.5, 18.0, 4.0, 2.0],
+      [3.0, 1.0, 6.0, 1.0]
+    ]
+  }
+}

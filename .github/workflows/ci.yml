@@ -1,0 +1,46 @@
+# Pull request: checks, then the full flow on DEV (train -> deploy -> smoke test -> monitor).
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore: ["docs/**", "**.md"]
+  workflow_dispatch:
+
+permissions:
+  id-token: write # OIDC login to Azure
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check . && ruff format --check .
+      - name: Unit tests
+        run: pytest -q
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: "~1.16" }
+      - name: Terraform fmt + validate
+        working-directory: infra/platform
+        run: |
+          terraform fmt -check -recursive
+          terraform init -backend=false -input=false
+          terraform validate
+
+  dev-train:
+    needs: checks
+    uses: ./.github/workflows/_train.yml
+    with: { environment: dev }
+
+  dev-deploy:
+    needs: dev-train
+    if: needs.dev-train.outputs.model_version != ''
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      environment: dev
+      model_version: ${{ needs.dev-train.outputs.model_version }}

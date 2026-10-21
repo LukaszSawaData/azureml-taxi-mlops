@@ -1,0 +1,7 @@
+# Local / CI checks only. The training environment is aml/environment/conda.yaml
+pandas==3.0.6
+numpy
+scikit-learn==1.9.1
+pyarrow==25.0.1
+pytest==9.1.1
+ruff==0.17.1

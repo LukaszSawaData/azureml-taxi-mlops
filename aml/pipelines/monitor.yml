@@ -1,0 +1,33 @@
+# Monitoring pipeline: same prep (same data tests) -> score the champion, quality + drift.
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+display_name: taxi-monitor
+experiment_name: taxi-monitoring
+settings:
+  default_compute: azureml:cpu-cluster
+inputs:
+  raw_data:
+    type: uri_file
+    path: azureml:nyc-taxi-green-2016-01:1
+  max_rows: 3000
+  split_date: "2016-01-25"
+  model_name: taxi-fare-model
+outputs:
+  report: { type: uri_folder } # promoted from the monitor step -> downloadable from the pipeline
+jobs:
+  prep:
+    type: command
+    component: ../components/prep.yml
+    inputs:
+      raw_data: ${{parent.inputs.raw_data}}
+      max_rows: ${{parent.inputs.max_rows}}
+      split_date: ${{parent.inputs.split_date}}
+  monitor:
+    type: command
+    component: ../components/monitor.yml
+    inputs:
+      train_data: ${{parent.jobs.prep.outputs.train_data}}
+      scoring_data: ${{parent.jobs.prep.outputs.scoring_data}}
+      model_name: ${{parent.inputs.model_name}}
+    outputs:
+      report: ${{parent.outputs.report}}

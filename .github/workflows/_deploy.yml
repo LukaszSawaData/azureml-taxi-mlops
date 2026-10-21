@@ -1,0 +1,33 @@
+# Reusable: put a model version on the online endpoint, smoke test it, run monitoring.
+name: deploy (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      environment: { type: string, required: true }
+      model_version: { type: string, required: true }
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    concurrency: { group: azureml-quota, cancel-in-progress: false }
+    env:
+      AML_WORKSPACE: ${{ vars.AML_WORKSPACE }}
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      ENDPOINT_NAME: ${{ vars.ENDPOINT_NAME }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Azure login (OIDC, no secrets)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - run: az extension add -n ml -y
+      - name: Deploy model v${{ inputs.model_version }} to the endpoint
+        run: scripts/deploy.sh "${{ inputs.model_version }}"
+      - name: Smoke test the endpoint
+        run: scripts/smoke_test.sh "${{ inputs.model_version }}"
+      - name: Monitoring (quality + drift of the champion)
+        run: scripts/monitor.sh "${{ vars.MAX_ROWS }}" | tee -a "$GITHUB_STEP_SUMMARY"

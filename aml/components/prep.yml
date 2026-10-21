@@ -1,0 +1,24 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+name: taxi_prep
+display_name: "1. Prep + data tests"
+inputs:
+  raw_data: { type: uri_file }
+  max_rows: { type: integer, default: 3000 }
+  split_date: { type: string, default: "2016-01-25" }
+  max_bad_share: { type: number, default: 0.2 }
+outputs:
+  train_data: { type: uri_folder }
+  scoring_data: { type: uri_folder }
+code: ../../src
+environment:
+  image: mcr.microsoft.com/azureml/openmpi5.0-ubuntu24.04:20261018.v1
+  conda_file: ../environment/conda.yaml
+command: >-
+  python -m jobs.prep
+  --raw_data ${{inputs.raw_data}}
+  --max_rows ${{inputs.max_rows}}
+  --split_date ${{inputs.split_date}}
+  --max_bad_share ${{inputs.max_bad_share}}
+  --train_data ${{outputs.train_data}}
+  --scoring_data ${{outputs.scoring_data}}
