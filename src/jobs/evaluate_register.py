@@ -14,7 +14,6 @@ from mlflow.exceptions import MlflowException
 
 from taxi_aml.model import (
     CHAMPION_TAG,
-    SKOPS_TRUSTED_TYPES,
     TARGET,
     evaluate,
     promotion_decision,
@@ -65,9 +64,8 @@ def main() -> None:
 
     info = mlflow.sklearn.log_model(
         mlflow.sklearn.load_model(args.model_input),
-        name="model",
+        artifact_path="model",  # MLflow 2.x API
         registered_model_name=args.model_name,
-        skops_trusted_types=SKOPS_TRUSTED_TYPES,
     )
     version = str(info.registered_model_version)
     for key, value in {
