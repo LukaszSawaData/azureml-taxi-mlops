@@ -31,7 +31,7 @@ def main() -> None:
         args.model_output,
         signature=infer_signature(sample, model.predict(sample)),
         input_example=sample,
-        pip_requirements=["mlflow==3.15.0", "scikit-learn==1.9.1", "pandas==3.0.6"],
+        pip_requirements=["mlflow==3.15.0", "scikit-learn==1.9.1", "pandas==2.3.3"],
     )
 
 
