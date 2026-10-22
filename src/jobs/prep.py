@@ -8,7 +8,6 @@ import pandas as pd
 
 from taxi_aml.model import RAW_COLUMNS, add_features, check_quality, clean, split_by_date
 
-
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--raw_data", required=True)
